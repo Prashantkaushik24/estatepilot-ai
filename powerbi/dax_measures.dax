@@ -1,0 +1,35 @@
+// EstatePilot AI - DAX measures. Tables: fact_leads, fact_emails, fact_tasks, dim_date, dim_lead, dim_property, dim_agent.
+// Relationships: see powerbi/README.md. Mark dim_date[date] as the date table. NOT executed in Power BI Desktop (no PBIX created).
+
+Total Leads = COUNTROWS ( FILTER ( fact_leads, fact_leads[is_archived] = 0 ) )
+
+New Leads = CALCULATE ( [Total Leads], fact_leads[is_new] = 1 )
+
+Qualified Leads = CALCULATE ( [Total Leads], fact_leads[is_qualified] = 1 )
+
+Hot Leads = CALCULATE ( [Total Leads], fact_leads[is_hot] = 1 )
+
+Total Emails Processed = CALCULATE ( COUNTROWS ( fact_emails ), fact_emails[is_processed] = 1 )
+
+Average First Response Minutes =
+CALCULATE ( AVERAGE ( fact_leads[first_response_minutes] ), NOT ISBLANK ( fact_leads[first_response_minutes] ) )
+
+Leads Converted = CALCULATE ( [Total Leads], fact_leads[is_converted] = 1 )
+
+Lead Conversion Rate = DIVIDE ( [Leads Converted], [Total Leads], 0 )
+
+Follow-up Completion Rate =
+DIVIDE (
+    CALCULATE ( COUNTROWS ( fact_tasks ), fact_tasks[is_completed] = 1 ),
+    CALCULATE ( COUNTROWS ( fact_tasks ), fact_tasks[status] <> "cancelled" ),
+    0
+)
+
+Pipeline Value = CALCULATE ( SUM ( fact_leads[pipeline_value] ), fact_leads[is_archived] = 0 )
+
+Won Deal Value = CALCULATE ( SUM ( fact_leads[won_value] ), fact_leads[is_archived] = 0 )
+
+// Month-over-month growth of lead creation (uses the relationship fact_leads[created_date_key] -> dim_date[date_key]).
+Leads Previous Month = CALCULATE ( [Total Leads], DATEADD ( dim_date[date], -1, MONTH ) )
+
+MoM Lead Growth = DIVIDE ( [Total Leads] - [Leads Previous Month], [Leads Previous Month] )

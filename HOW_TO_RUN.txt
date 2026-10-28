@@ -1,0 +1,96 @@
+ESTATEPILOT AI - HOW TO RUN LOCALLY (no Docker needed)
+======================================================
+
+REQUIREMENTS
+- Python 3.12 or newer   (tested on 3.13)
+- Node.js 18 or newer    (tested on Node 26) with npm
+- No database setup needed (SQLite is used automatically)
+- No API keys needed (runs in demo AI mode)
+
+Do NOT copy backend/.venv or frontend/node_modules when sharing the project.
+Your friend creates them with the steps below.
+
+
+STEP 1 - BACKEND (Terminal 1)
+-----------------------------
+macOS / Linux:
+
+    cd backend
+    python3 -m venv .venv
+    .venv/bin/pip install -r requirements.txt
+    .venv/bin/alembic upgrade head
+    .venv/bin/python -m app.db.seed
+    .venv/bin/uvicorn app.main:app --port 8000
+
+Windows PowerShell:  (not tested on Windows)
+
+    cd backend
+    py -m venv .venv
+    .venv\Scripts\pip install -r requirements.txt
+    .venv\Scripts\alembic upgrade head
+    .venv\Scripts\python -m app.db.seed
+    .venv\Scripts\uvicorn app.main:app --port 8000
+
+Check it works: open http://localhost:8000/health  (should show "status":"ok")
+API docs:        http://localhost:8000/docs
+
+
+STEP 2 - FRONTEND (Terminal 2, leave the backend running)
+---------------------------------------------------------
+    cd frontend
+    npm install
+    npm run dev
+
+Open http://localhost:5173
+
+
+STEP 3 - LOG IN
+---------------
+Password for all demo users: Passw0rd!demo
+
+    admin@demo.com     (admin)
+    manager@demo.com   (manager)
+    agent@demo.com     (agent)     <- use this one for the demo
+    analyst@demo.com   (read-only)
+
+
+QUICK DEMO
+----------
+1. Go to Inbox -> "Paste email" (or "Load demo emails").
+   Example text:
+   "Hello, I am looking for a 3 BHK apartment in Jaipur under Rs 80 lakh.
+    I prefer a location near schools and would like to move within two months."
+2. Process it, then review the extracted requirements.
+3. Open the lead (score and reasons) and the matching properties.
+4. Edit and approve the reply draft. Sending stays blocked by design.
+5. Check Follow-ups for the auto-created task.
+6. Check the Overview dashboard and the Activity page.
+
+
+RUN TESTS (optional)
+--------------------
+    cd backend  && .venv/bin/pytest -q
+    cd frontend && npm test && npm run build
+
+
+RESET THE DATABASE
+------------------
+Stop the backend, delete the .db file in backend/ , then run again:
+    alembic upgrade head
+    python -m app.db.seed
+
+
+TROUBLESHOOTING
+---------------
+- Port 8000 or 5173 busy: stop the other program, or use another port,
+  e.g. uvicorn ... --port 8001 and set VITE_API_URL in frontend/.env
+  (see frontend/.env.example). If you use another frontend port, add it to
+  CORS_ORIGINS in backend/.env (see backend/.env.example).
+- "command not found: python3" / pip errors: install Python 3.12+ first.
+- Frontend shows API/network errors: make sure the backend is running and
+  http://localhost:8000/health responds.
+- Gmail, real OpenAI/Gemini and Power BI need your own credentials
+  (see backend/.env.example and docs/ESTATEPILOT_AI_COMPLETE_GUIDE.md).
+  They were not tested live. Without them, pasted/demo emails still work.
+
+Full documentation: docs/ESTATEPILOT_AI_COMPLETE_GUIDE.md (and .docx)
