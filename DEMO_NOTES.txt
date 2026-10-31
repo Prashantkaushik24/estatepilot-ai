@@ -1,0 +1,107 @@
+ESTATEPILOT AI - DEMO NOTES (read before presenting)
+=====================================================
+Purpose: list every place where the demo may look "broken" or ask for
+credentials, so nothing surprises you in front of an audience.
+
+IMPORTANT: The app NEVER asks for an email password. Gmail uses Google's OAuth
+login popup. For the demo you do NOT need Gmail at all - use pasted / demo
+emails. They go through the same AI pipeline.
+
+
+1. WHAT WORKS WITH ZERO CREDENTIALS (safe to demo)
+--------------------------------------------------
+- Login (agent@demo.com / Passw0rd!demo)
+- Inbox: "Paste email" and "Load demo emails" -> classify, extract, lead,
+  score + reasons, property matches, reply draft, follow-up task
+- Lead / Property / Follow-up create, edit, archive, search, CSV export
+- Property matching (against the stored demo properties only)
+- Automation Center: pause/resume, rule toggles, kill switch (admin only)
+- Activity / audit logs, Overview dashboard, Analytics charts + CSV export
+- Duplicate email protection (pasting the same email twice -> "duplicate")
+
+
+2. THINGS THAT WILL LOOK "WRONG" IF YOU CLICK THEM - AVOID OR EXPLAIN
+---------------------------------------------------------------------
+Thing                         What happens                      What to say / do
+----------------------------  --------------------------------  ---------------------------
+Settings -> Gmail "Connect"   Error: Gmail OAuth not            "Live Gmail needs Google Cloud
+                              configured (no client id)          credentials; I demo with pasted
+                                                                 emails." Don't click it.
+Gmail "Sync"                  Fails / disabled (not connected)  Same as above. Skip.
+Inbox -> "Send" button        Disabled or blocked (403:         This is DELIBERATE safety:
+                              sending disabled)                  draft-only, approve-before-send,
+                                                                 kill switch. Say so.
+AI badge "DEMO AI"            Shown on every result             Results come from a rule-based
+                                                                 demo engine, NOT OpenAI. Don't
+                                                                 call it GPT/LLM output.
+Real OpenAI / Gemini          Not active without API key        Set OPENAI_API_KEY in backend/.env
+                                                                 only if you want it - untested live.
+Analytics -> Power BI         "Not configured" setup state      Say: SQL views + DAX provided,
+                                                                 no PBIX / embed created.
+Pasting the same email twice  409 "duplicate"                   Feature, not a bug. Use a
+                                                                 different sender/text for a new run.
+Unusual / vague email text    Fields shown as unknown /         Feature: unknown stays unknown,
+                                missing_information list          nothing is invented.
+Email in a non-English or     Demo AI is regex/keyword-based,   Stick to English emails that
+very different style          may extract little                mention BHK, city, budget.
+Budget phrasing               Understands "80 lakh", "1.2 crore"  Use those formats, e.g.
+                              style; odd formats may be missed    "under Rs 80 lakh".
+Property match shows a 2 BHK  Scores >=50 are listed; the       Explain: match explanation
+for a 3 BHK request           explanation lists the gap          shows why (bedroom gap noted).
+Login as analyst              Write buttons disabled/403        Read-only role by design.
+Login as manager -> Gmail     Buttons visible but API says 403  Known bug (admin required).
+Users list as agent           Not available (manager+ only)     Log in as admin to show users.
+Dashboard numbers             Include seeded DEMO leads/tasks   A banner says demo data is
+                                                                 present. Don't present them as
+                                                                 real business results.
+Avg first response            May show empty / N/A              Not enough reliable data.
+
+
+3. WHAT IS NOT VERIFIED (do not claim in the demo)
+--------------------------------------------------
+- Live Gmail connect / sync / send   (tested only with mocks)
+- Real OpenAI or Gemini output       (tested only with mocks)
+- PostgreSQL, Docker / docker-compose (never run)
+- Power BI report, DAX, embedding    (files only, no PBIX)
+- Windows commands                    (not run on Windows)
+- Browser UI click-through            (API + unit tests verified; no browser
+                                       test was run - click through once yourself
+                                       BEFORE the demo)
+- It is a local MVP, NOT production-secure or enterprise-ready.
+- No accuracy / performance numbers exist. Do not quote any.
+
+
+4. PRE-DEMO CHECKLIST (5 minutes before)
+----------------------------------------
+[ ] Backend running: http://localhost:8000/health shows "status":"ok"
+[ ] Frontend running: open http://localhost:5173 (use "localhost", NOT 127.0.0.1)
+[ ] Log in as agent@demo.com / Passw0rd!demo
+[ ] Fresh DB for a clean demo (see HOW_TO_RUN.txt "Reset the database")
+[ ] Have the example email ready to paste (below)
+[ ] Do one full dry run first; the same email can only be imported once
+    per database, so reset the DB (or change the text/sender) afterwards
+[ ] Close tabs showing .env or terminals with secrets
+[ ] Never put real keys/passwords in the project folder before sharing
+
+
+5. SAFE DEMO EMAIL (paste into Inbox)
+-------------------------------------
+Sender: rahul.verma@example.com   Name: Rahul Verma
+Subject: Looking for a 3 BHK in Jaipur
+Body:
+Hello, I am looking for a 3 BHK apartment in Jaipur under Rs 80 lakh.
+I prefer a location near schools and would like to move within two months.
+My number is 9876543210.
+
+
+6. IF SOMETHING GOES WRONG LIVE
+-------------------------------
+- Page shows API / network error  -> backend not running; restart it
+                                     (HOW_TO_RUN.txt step 1)
+- Blank page / CORS error         -> you opened 127.0.0.1; use localhost:5173
+- "automation paused" message     -> Automation Center -> Resume
+                                     (or kill switch is on: admin turns it off)
+- Email stuck in "failed"         -> click Process / Retry (safe to retry)
+- Login rate-limited              -> wait a minute and retry
+- Say calmly: "This is a local MVP; that integration needs credentials I
+  haven't configured for this demo."
